@@ -127,6 +127,7 @@ if { $bCheckIPs == 1 } {
 xilinx.com:ip:processing_system7:5.5\
 xilinx.com:ip:proc_sys_reset:5.0\
 xilinx.com:ip:xadc_wiz:3.3\
+xilinx.com:ip:xlconcat:2.1\
 "
 
    set list_ips_missing ""
@@ -249,11 +250,13 @@ proc create_root_design { parentCell } {
    CONFIG.PCW_APU_PERIPHERAL_FREQMHZ {650} \
    CONFIG.PCW_ARMPLL_CTRL_FBDIV {26} \
    CONFIG.PCW_CAN0_BASEADDR {0xE0008000} \
+   CONFIG.PCW_CAN0_GRP_CLK_ENABLE {0} \
    CONFIG.PCW_CAN0_HIGHADDR {0xE0008FFF} \
    CONFIG.PCW_CAN0_PERIPHERAL_CLKSRC {External} \
    CONFIG.PCW_CAN0_PERIPHERAL_ENABLE {0} \
    CONFIG.PCW_CAN0_PERIPHERAL_FREQMHZ {-1} \
    CONFIG.PCW_CAN1_BASEADDR {0xE0009000} \
+   CONFIG.PCW_CAN1_GRP_CLK_ENABLE {0} \
    CONFIG.PCW_CAN1_HIGHADDR {0xE0009FFF} \
    CONFIG.PCW_CAN1_PERIPHERAL_CLKSRC {External} \
    CONFIG.PCW_CAN1_PERIPHERAL_ENABLE {0} \
@@ -410,6 +413,14 @@ proc create_root_design { parentCell } {
    CONFIG.PCW_FPGA_FCLK1_ENABLE {0} \
    CONFIG.PCW_FPGA_FCLK2_ENABLE {0} \
    CONFIG.PCW_FPGA_FCLK3_ENABLE {0} \
+   CONFIG.PCW_FTM_CTI_IN0 {<Select>} \
+   CONFIG.PCW_FTM_CTI_IN1 {<Select>} \
+   CONFIG.PCW_FTM_CTI_IN2 {<Select>} \
+   CONFIG.PCW_FTM_CTI_IN3 {<Select>} \
+   CONFIG.PCW_FTM_CTI_OUT0 {<Select>} \
+   CONFIG.PCW_FTM_CTI_OUT1 {<Select>} \
+   CONFIG.PCW_FTM_CTI_OUT2 {<Select>} \
+   CONFIG.PCW_FTM_CTI_OUT3 {<Select>} \
    CONFIG.PCW_GP0_EN_MODIFIABLE_TXN {1} \
    CONFIG.PCW_GP0_NUM_READ_THREADS {4} \
    CONFIG.PCW_GP0_NUM_WRITE_THREADS {4} \
@@ -424,10 +435,12 @@ proc create_root_design { parentCell } {
    CONFIG.PCW_GPIO_MIO_GPIO_IO {MIO} \
    CONFIG.PCW_GPIO_PERIPHERAL_ENABLE {0} \
    CONFIG.PCW_I2C0_BASEADDR {0xE0004000} \
+   CONFIG.PCW_I2C0_GRP_INT_ENABLE {0} \
    CONFIG.PCW_I2C0_HIGHADDR {0xE0004FFF} \
    CONFIG.PCW_I2C0_PERIPHERAL_ENABLE {0} \
    CONFIG.PCW_I2C0_RESET_ENABLE {0} \
    CONFIG.PCW_I2C1_BASEADDR {0xE0005000} \
+   CONFIG.PCW_I2C1_GRP_INT_ENABLE {0} \
    CONFIG.PCW_I2C1_HIGHADDR {0xE0005FFF} \
    CONFIG.PCW_I2C1_PERIPHERAL_ENABLE {0} \
    CONFIG.PCW_I2C1_RESET_ENABLE {0} \
@@ -439,7 +452,7 @@ proc create_root_design { parentCell } {
    CONFIG.PCW_INCLUDE_TRACE_BUFFER {0} \
    CONFIG.PCW_IOPLL_CTRL_FBDIV {20} \
    CONFIG.PCW_IO_IO_PLL_FREQMHZ {1000.000} \
-   CONFIG.PCW_IRQ_F2P_INTR {0} \
+   CONFIG.PCW_IRQ_F2P_INTR {1} \
    CONFIG.PCW_IRQ_F2P_MODE {DIRECT} \
    CONFIG.PCW_MIO_0_DIRECTION {inout} \
    CONFIG.PCW_MIO_0_IOTYPE {LVCMOS 3.3V} \
@@ -839,6 +852,11 @@ Flash#Quad SPI Flash#GPIO#Quad SPI Flash#ENET Reset#GPIO#GPIO#GPIO#GPIO#UART\
    CONFIG.PCW_TPIU_PERIPHERAL_FREQMHZ {200} \
    CONFIG.PCW_TRACE_BUFFER_CLOCK_DELAY {12} \
    CONFIG.PCW_TRACE_BUFFER_FIFO_SIZE {128} \
+   CONFIG.PCW_TRACE_GRP_16BIT_ENABLE {0} \
+   CONFIG.PCW_TRACE_GRP_2BIT_ENABLE {0} \
+   CONFIG.PCW_TRACE_GRP_32BIT_ENABLE {0} \
+   CONFIG.PCW_TRACE_GRP_4BIT_ENABLE {0} \
+   CONFIG.PCW_TRACE_GRP_8BIT_ENABLE {0} \
    CONFIG.PCW_TRACE_INTERNAL_WIDTH {2} \
    CONFIG.PCW_TRACE_PERIPHERAL_ENABLE {0} \
    CONFIG.PCW_TRACE_PIPELINE_WIDTH {8} \
@@ -985,7 +1003,7 @@ Flash#Quad SPI Flash#GPIO#Quad SPI Flash#ENET Reset#GPIO#GPIO#GPIO#GPIO#UART\
    CONFIG.PCW_USE_DMA3 {0} \
    CONFIG.PCW_USE_EXPANDED_IOP {0} \
    CONFIG.PCW_USE_EXPANDED_PS_SLCR_REGISTERS {0} \
-   CONFIG.PCW_USE_FABRIC_INTERRUPT {0} \
+   CONFIG.PCW_USE_FABRIC_INTERRUPT {1} \
    CONFIG.PCW_USE_HIGH_OCM {0} \
    CONFIG.PCW_USE_M_AXI_GP0 {1} \
    CONFIG.PCW_USE_M_AXI_GP1 {0} \
@@ -1055,6 +1073,12 @@ Flash#Quad SPI Flash#GPIO#Quad SPI Flash#ENET Reset#GPIO#GPIO#GPIO#GPIO#UART\
    CONFIG.XADC_STARUP_SELECTION {channel_sequencer} \
  ] $xadc_wiz_0
 
+  # Create instance: xlconcat_0, and set properties
+  set xlconcat_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 xlconcat_0 ]
+  set_property -dict [ list \
+   CONFIG.NUM_PORTS {1} \
+ ] $xlconcat_0
+
   # Create interface connections
   connect_bd_intf_net -intf_net Vaux0_0_1 [get_bd_intf_ports Vaux0_0] [get_bd_intf_pins xadc_wiz_0/Vaux0]
   connect_bd_intf_net -intf_net Vaux12_0_1 [get_bd_intf_ports Vaux12] [get_bd_intf_pins xadc_wiz_0/Vaux12]
@@ -1073,6 +1097,8 @@ Flash#Quad SPI Flash#GPIO#Quad SPI Flash#ENET Reset#GPIO#GPIO#GPIO#GPIO#UART\
   connect_bd_net -net processing_system7_0_FCLK_CLK0 [get_bd_pins processing_system7_0/FCLK_CLK0] [get_bd_pins processing_system7_0/M_AXI_GP0_ACLK] [get_bd_pins ps7_0_axi_periph/ACLK] [get_bd_pins ps7_0_axi_periph/M00_ACLK] [get_bd_pins ps7_0_axi_periph/S00_ACLK] [get_bd_pins rst_ps7_0_100M/slowest_sync_clk] [get_bd_pins xadc_wiz_0/s_axi_aclk]
   connect_bd_net -net processing_system7_0_FCLK_RESET0_N [get_bd_pins processing_system7_0/FCLK_RESET0_N] [get_bd_pins rst_ps7_0_100M/ext_reset_in]
   connect_bd_net -net rst_ps7_0_100M_peripheral_aresetn [get_bd_pins ps7_0_axi_periph/ARESETN] [get_bd_pins ps7_0_axi_periph/M00_ARESETN] [get_bd_pins ps7_0_axi_periph/S00_ARESETN] [get_bd_pins rst_ps7_0_100M/peripheral_aresetn] [get_bd_pins xadc_wiz_0/s_axi_aresetn]
+  connect_bd_net -net xadc_wiz_0_ip2intc_irpt [get_bd_pins xadc_wiz_0/ip2intc_irpt] [get_bd_pins xlconcat_0/In0]
+  connect_bd_net -net xlconcat_0_dout [get_bd_pins processing_system7_0/IRQ_F2P] [get_bd_pins xlconcat_0/dout]
 
   # Create address segments
   assign_bd_address -offset 0x43C00000 -range 0x00010000 -target_address_space [get_bd_addr_spaces processing_system7_0/Data] [get_bd_addr_segs xadc_wiz_0/s_axi_lite/Reg] -force
